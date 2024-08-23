@@ -26,6 +26,8 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
     private final EntityType<T> entityType;
     private final int maxGrowthTime;
 
+    private long lastSpawnTick = -1;
+
     public MobSeedEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int spawnTimer, EntityType<T> entityType, int maxGrowthTime) {
         super(type, pos, state);
         this.spawnTimer = spawnTimer;
@@ -40,10 +42,15 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
 
         FluidState fluidState = level.getFluidState(pos);
         if (level.getBlockState(pos.below()).getFluidState().getType() == Fluids.WATER)
+        {
             return;
+        }
         else if (level.getBlockState(pos.below()).getFluidState().getType() == Fluids.LAVA)
+        {
             return;
-        else if (level.getBlockState(pos.below()).is(Blocks.AIR)) {
+        }
+        else if (level.getBlockState(pos.below()).is(Blocks.AIR))
+        {
             return;
         }
 
@@ -56,13 +63,14 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
             sync();
         }
 
-        if (spawnTimer <= 0) {
+        // Check if enough time has passed to spawn a mob (prevent multiple spawns in the same tick)
+        long currentTick = level.getGameTime();
+        if (spawnTimer <= 0 && currentTick != lastSpawnTick) {
             T mob = entityType.create(level);
             if (mob != null) {
                 Vec3 spawnPosition = Vec3.atBottomCenterOf(pos);
                 mob.setPos(spawnPosition.x, spawnPosition.y, spawnPosition.z);
-                if (mob instanceof AgeableMob)
-                {
+                if (mob instanceof AgeableMob) {
                     mob.setBaby(true);
                 }
                 level.addFreshEntity(mob);
@@ -74,6 +82,8 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
                     level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                 }
                 level.playSound(null, pos, SoundType.GRASS.getPlaceSound(), SoundSource.NEUTRAL, 1.0F, 1.0F);
+
+                lastSpawnTick = currentTick;
             }
         }
     }
@@ -113,12 +123,16 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
         if (tag.contains("SpawnTimer")) {
             spawnTimer = tag.getInt("SpawnTimer");
         }
+        if (tag.contains("LastSpawnTick")) {
+            lastSpawnTick = tag.getLong("LastSpawnTick");
+        }
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putInt("SpawnTimer", spawnTimer);
+        tag.putLong("LastSpawnTick", lastSpawnTick);
     }
 
     @Override
