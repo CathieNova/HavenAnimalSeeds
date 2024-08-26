@@ -86,6 +86,8 @@ dependencies {
     // at runtime, use the full JEI jar for Forge
     runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
     implementation fg.deobf("curse.maven:jade-324717:5339264")
+    // use this for testing without jade, just comment out the above line
+    // compileOnly(fg.deobf("curse.maven:jade-324717:5339264"))
 }
 
 tasks.named('processResources', ProcessResources).configure {
