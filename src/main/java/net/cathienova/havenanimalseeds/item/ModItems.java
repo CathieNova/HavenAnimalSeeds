@@ -1,14 +1,11 @@
 package net.cathienova.havenanimalseeds.item;
 
 import net.cathienova.havenanimalseeds.HavenAnimalSeeds;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModItems {
-    public static final DeferredRegister<Item> ITEMS =
-            DeferredRegister.create(ForgeRegistries.ITEMS, HavenAnimalSeeds.MOD_ID);
+    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(HavenAnimalSeeds.MOD_ID);
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

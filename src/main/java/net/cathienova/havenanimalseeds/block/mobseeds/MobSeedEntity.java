@@ -1,7 +1,8 @@
 package net.cathienova.havenanimalseeds.block.mobseeds;
 
-import net.cathienova.havenanimalseeds.config.HavenConfig;
+import net.cathienova.havenanimalseeds.config.CommonConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundSource;
@@ -54,8 +55,11 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
             return;
         }
 
-        int pDist = HavenConfig.playerGrowthDistance;
-        boolean playerNearby = !level.getEntitiesOfClass(Player.class, new AABB(pos.offset(-pDist, -pDist, -pDist), pos.offset(pDist, pDist, pDist))).isEmpty();
+        int pDist = CommonConfig.playerGrowthDistance.get();
+        boolean playerNearby = !level.getEntitiesOfClass(Player.class, new AABB(
+                Vec3.atCenterOf(pos).subtract(pDist, pDist, pDist),
+                Vec3.atCenterOf(pos).add(pDist, pDist, pDist)
+        )).isEmpty();
 
         if (!playerNearby) {
             spawnTimer--;
@@ -118,8 +122,9 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    {
+        super.loadAdditional(tag, registries);
         if (tag.contains("SpawnTimer")) {
             spawnTimer = tag.getInt("SpawnTimer");
         }
@@ -129,21 +134,21 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("SpawnTimer", spawnTimer);
         tag.putLong("LastSpawnTick", lastSpawnTick);
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
         return tag;
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag) {
-        load(tag);
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+        loadAdditional(tag, lookupProvider);
     }
 }

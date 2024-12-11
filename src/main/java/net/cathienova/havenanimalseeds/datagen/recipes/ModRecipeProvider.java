@@ -3,30 +3,23 @@ package net.cathienova.havenanimalseeds.datagen.recipes;
 import net.cathienova.havenanimalseeds.HavenAnimalSeeds;
 import net.cathienova.havenanimalseeds.block.ModBlocks;
 import net.cathienova.havenanimalseeds.util.ModTags;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.common.conditions.IConditionBuilder;
 
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 public class ModRecipeProvider extends RecipeProvider implements IConditionBuilder
 {
-    public ModRecipeProvider(PackOutput pOutput)
-    {
-        super(pOutput);
+    public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries);
     }
 
     @Override
-    protected void buildRecipes(@NotNull Consumer<FinishedRecipe> output)
+    protected void buildRecipes(RecipeOutput output)
     {
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModBlocks.axolotl_seed.get(), 1)
                 .pattern("SSS")

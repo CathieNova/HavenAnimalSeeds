@@ -4,7 +4,7 @@ import net.cathienova.havenanimalseeds.HavenAnimalSeeds;
 import net.cathienova.havenanimalseeds.block.ModBlocks;
 import net.cathienova.havenanimalseeds.item.ModCreativeModTabs;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.common.data.LanguageProvider;
 
 public class ModEngLangProvider extends LanguageProvider
 {

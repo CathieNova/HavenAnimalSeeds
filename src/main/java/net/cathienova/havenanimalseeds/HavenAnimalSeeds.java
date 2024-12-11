@@ -6,44 +6,31 @@ import net.cathienova.havenanimalseeds.block.ModBlocks;
 import net.cathienova.havenanimalseeds.config.CommonConfig;
 import net.cathienova.havenanimalseeds.item.ModCreativeModTabs;
 import net.cathienova.havenanimalseeds.item.ModItems;
+import net.cathienova.havenanimalseeds.util.DistUtils;
 import net.cathienova.havenanimalseeds.util.MobSeedRenderer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.commons.lang3.tuple.Pair;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 @Mod(HavenAnimalSeeds.MOD_ID)
 public class HavenAnimalSeeds
 {
     public static final String MOD_ID = "havenanimalseeds";
     public static final String MOD_NAME = "HavenAnimalSeeds";
-    static final ForgeConfigSpec commonSpec;
-    public static final CommonConfig c_config;
 
-    static {
-        final Pair<CommonConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(CommonConfig::new);
-        commonSpec = specPair.getRight();
-        c_config = specPair.getLeft();
-    }
-
-    public HavenAnimalSeeds()
+    public HavenAnimalSeeds(IEventBus modEventBus, ModContainer modContainer)
     {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonSpec, MOD_NAME + "-Config.toml");
+        modEventBus.addListener(this::setup);
+        modContainer.registerConfig(ModConfig.Type.COMMON, CommonConfig.SPEC);
         ModBlocks.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModCreativeModTabs.register(modEventBus);
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> MobSeedRenderer::new);
-        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> HavenAnimalSeedsClient::new);
-        MinecraftForge.EVENT_BUS.register(this);
+        DistUtils.runIfOn(Dist.CLIENT, MobSeedRenderer::new);
+        DistUtils.runIfOn(Dist.CLIENT, HavenAnimalSeedsClient::new);
     }
 
     public static void Log(String message)

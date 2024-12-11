@@ -1,5 +1,6 @@
 package net.cathienova.havenanimalseeds.block.mobseeds;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -32,6 +33,12 @@ public abstract class MobSeedBlock extends BaseEntityBlock
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return createTileEntity(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec()
+    {
+        return null;
     }
 
     @Nullable
