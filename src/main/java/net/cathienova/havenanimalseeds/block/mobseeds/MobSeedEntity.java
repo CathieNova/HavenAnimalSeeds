@@ -1,6 +1,6 @@
 package net.cathienova.havenanimalseeds.block.mobseeds;
 
-import net.cathienova.havenanimalseeds.config.CommonConfig;
+import net.cathienova.havenanimalseeds.config.HavenConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -55,7 +55,7 @@ public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
             return;
         }
 
-        int pDist = CommonConfig.playerGrowthDistance.get();
+        int pDist = HavenConfig.playerGrowthDistance;
         boolean playerNearby = !level.getEntitiesOfClass(Player.class, new AABB(
                 Vec3.atCenterOf(pos).subtract(pDist, pDist, pDist),
                 Vec3.atCenterOf(pos).add(pDist, pDist, pDist)

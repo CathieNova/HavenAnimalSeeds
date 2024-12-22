@@ -16,7 +16,7 @@ public class ModCreativeModTabs
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, HavenAnimalSeeds.MOD_ID);
 
-    public static String HavenAnimalSeeds_tab_title = "itemgroup.havenksh.havenanimalseeds_tab";
+    public static String HavenAnimalSeeds_tab_title = "itemgroup.havenanimalseeds.havenanimalseeds_tab";
     public static final Supplier<CreativeModeTab> Haven_TAB = CREATIVE_MODE_TABS.register("havenanimalseeds_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModBlocks.chicken_seed.get()))
                     .title(Component.translatable(HavenAnimalSeeds_tab_title))

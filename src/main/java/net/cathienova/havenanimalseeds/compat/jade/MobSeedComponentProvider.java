@@ -1,6 +1,7 @@
 package net.cathienova.havenanimalseeds.compat.jade;
 
 import net.cathienova.havenanimalseeds.config.CommonConfig;
+import net.cathienova.havenanimalseeds.config.HavenConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +26,7 @@ public enum MobSeedComponentProvider implements IBlockComponentProvider {
             int remainingTime = accessor.getServerData().getInt("RemainingTime");
             tooltip.append(Component.translatable("mobseed.remaining_time", remainingTime));
 
-            if (accessor.getPlayer() != null && accessor.getPlayer().distanceToSqr(accessor.getPosition().getX(), accessor.getPosition().getY(), accessor.getPosition().getZ()) < Math.pow(CommonConfig.playerGrowthDistance.get(), 2)) {
+            if (accessor.getPlayer() != null && accessor.getPlayer().distanceToSqr(accessor.getPosition().getX(), accessor.getPosition().getY(), accessor.getPosition().getZ()) < Math.pow(HavenConfig.playerGrowthDistance, 2)) {
                 tooltip.add(Component.translatable("mobseed.tooclose"));
             }
 
