@@ -20,11 +20,6 @@ license="${mod_license}"
     ordering="NONE"
     side="BOTH"
 [[dependencies.havenanimalseeds]]
-    modId="jei"
-    versionRange="[19.20,)"
-    ordering="NONE"
-    side="BOTH"
-[[dependencies.havenanimalseeds]]
     modId="jade"
     versionRange="[15.8.1,)"
     ordering="NONE"

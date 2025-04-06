@@ -19,7 +19,7 @@ public class MobSeedRenderer<T extends MobSeedEntity<?>> implements BlockEntityR
     private final EntityRenderDispatcher dispatcher;
 
     public MobSeedRenderer() {
-        this.dispatcher = null;//Minecraft.getInstance().getEntityRenderDispatcher();
+        this.dispatcher = null;
     }
 
     public MobSeedRenderer(BlockEntityRendererProvider.Context context)
@@ -27,6 +27,7 @@ public class MobSeedRenderer<T extends MobSeedEntity<?>> implements BlockEntityR
         this.dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     public void render(T blockEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         blockEntity.requestModelDataUpdate();

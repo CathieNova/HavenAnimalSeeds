@@ -40,8 +40,7 @@ public class HavenAnimalSeeds
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModCreativeModTabs.register(modEventBus);
-        DistUtils.runIfOn(Dist.CLIENT, MobSeedRenderer::new);
-        DistUtils.runIfOn(Dist.CLIENT, HavenAnimalSeedsClient::new);
+        DistUtils.runIfClient(HavenAnimalSeedsClient::new);
     }
 
     public static void Log(String message)
