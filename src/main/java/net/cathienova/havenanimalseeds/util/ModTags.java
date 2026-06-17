@@ -1,7 +1,7 @@
 package net.cathienova.havenanimalseeds.util;
 
 import net.cathienova.havenanimalseeds.HavenAnimalSeeds;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -16,13 +16,7 @@ public class ModTags
 
         private static TagKey<Block> tag(String name)
         {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath(HavenAnimalSeeds.MOD_ID, name));
-        }
-        private static TagKey<Block> minecraftTag(String name) {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath("minecraft", name));
-        }
-        private static TagKey<Block> forgeTag(String name) {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath("forge", name));
+            return BlockTags.create(Identifier.fromNamespaceAndPath(HavenAnimalSeeds.MOD_ID, name));
         }
     }
 
@@ -33,10 +27,7 @@ public class ModTags
 
         private static TagKey<Item> tag(String name)
         {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(HavenAnimalSeeds.MOD_ID, name));
-        }
-        private static TagKey<Item> forgeTag(String name) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", name));
+            return ItemTags.create(Identifier.fromNamespaceAndPath(HavenAnimalSeeds.MOD_ID, name));
         }
     }
 }

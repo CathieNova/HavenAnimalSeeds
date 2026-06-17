@@ -42,7 +42,11 @@ public class ModEngLangProvider extends LanguageProvider
         add(ModBlocks.glow_squid_seed.get(), "Glow Squid Seed");
         add(ModBlocks.polar_bear_seed.get(), "Polar Bear Seed");
         add(ModBlocks.squid_seed.get(), "Squid Seed");
-        add(ModBlocks.villager_seed.get(), "Village Seed");
+        add(ModBlocks.villager_seed.get(), "Villager Seed");
+        add(ModBlocks.allay_seed.get(), "Allay Seed");
+        add(ModBlocks.armadillo_seed.get(), "Armadillo Seed");
+        add(ModBlocks.camel_seed.get(), "Camel Seed");
+        add(ModBlocks.nautilus_seed.get(), "Nautilus Seed");
 
         add("mobseed.remaining_time", "Growing time: %d seconds");
         add("mobseed.tooclose", "§cYou're too close to the seed for it to grow.");

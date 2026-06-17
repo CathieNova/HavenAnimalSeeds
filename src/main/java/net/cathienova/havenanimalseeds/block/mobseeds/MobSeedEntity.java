@@ -1,154 +1,326 @@
 package net.cathienova.havenanimalseeds.block.mobseeds;
 
+import net.cathienova.havenanimalseeds.block.ModBlockEntities;
 import net.cathienova.havenanimalseeds.config.HavenConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.event.EventHooks;
 
-public abstract class MobSeedEntity<T extends Mob> extends BlockEntity {
+public class MobSeedEntity extends BlockEntity
+{
+    public static final int GROWTH_CHECK_INTERVAL = 10;
+    private static final int SAVE_INTERVAL = 20;
+    private static final int CLIENT_SYNC_INTERVAL = 100;
 
     private int spawnTimer;
-    private final EntityType<T> entityType;
-    private final int maxGrowthTime;
+    private int maxGrowthTime;
+    private int ticksSinceSave;
+    private int ticksSinceClientSync;
+    private long lastGrowthTick = -1;
+    private boolean growthPaused;
+    private long clientSyncGameTime = -1;
+    private CompoundTag mobVariant = new CompoundTag();
+    private String mobVariantKey = "";
+    private boolean mobVariantReady;
 
-    private long lastSpawnTick = -1;
-
-    public MobSeedEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int spawnTimer, EntityType<T> entityType, int maxGrowthTime) {
-        super(type, pos, state);
-        this.spawnTimer = spawnTimer;
-        this.entityType = entityType;
-        this.maxGrowthTime = maxGrowthTime;
+    public MobSeedEntity(BlockPos pos, BlockState state)
+    {
+        super(ModBlockEntities.mob_seed.get(), pos, state);
+        maxGrowthTime = Math.max(1, getSeedBlock().getGrowthTime());
+        spawnTimer = maxGrowthTime;
     }
 
-    public void tick(Level level, BlockPos pos, BlockState state, MobSeedEntity<?> blockEntity) {
-        if (level.isClientSide) {
-            return;
-        }
-
-        FluidState fluidState = level.getFluidState(pos);
-        if (level.getBlockState(pos.below()).getFluidState().getType() == Fluids.WATER)
-        {
-            return;
-        }
-        else if (level.getBlockState(pos.below()).getFluidState().getType() == Fluids.LAVA)
-        {
-            return;
-        }
-        else if (level.getBlockState(pos.below()).is(Blocks.AIR))
+    public void grow(ServerLevel level, BlockPos pos, BlockState state)
+    {
+        if (!ensureMobVariant(level, pos))
         {
             return;
         }
 
-        int pDist = HavenConfig.playerGrowthDistance;
-        boolean playerNearby = !level.getEntitiesOfClass(Player.class, new AABB(
-                Vec3.atCenterOf(pos).subtract(pDist, pDist, pDist),
-                Vec3.atCenterOf(pos).add(pDist, pDist, pDist)
-        )).isEmpty();
-
-        if (!playerNearby) {
-            spawnTimer--;
-            setChanged();
-            sync();
-        }
-
-        // Check if enough time has passed to spawn a mob (prevent multiple spawns in the same tick)
         long currentTick = level.getGameTime();
-        if (spawnTimer <= 0 && currentTick != lastSpawnTick) {
-            T mob = entityType.create(level);
-            if (mob != null) {
-                Vec3 spawnPosition = Vec3.atBottomCenterOf(pos);
-                mob.setPos(spawnPosition.x, spawnPosition.y, spawnPosition.z);
-                if (mob instanceof AgeableMob) {
-                    mob.setBaby(true);
-                }
-                level.addFreshEntity(mob);
-                if (fluidState.getType() == Fluids.WATER) {
-                    level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
-                } else if (fluidState.getType() == Fluids.LAVA) {
-                    level.setBlock(pos, Blocks.LAVA.defaultBlockState(), 3);
-                } else {
-                    level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                }
-                level.playSound(null, pos, SoundType.GRASS.getPlaceSound(), SoundSource.NEUTRAL, 1.0F, 1.0F);
+        int elapsedTicks = getElapsedTicks(currentTick);
+        boolean playerNearby = hasPlayerNearby(level, pos, HavenConfig.playerGrowthDistance);
+        boolean pauseChanged = playerNearby != growthPaused;
+        growthPaused = playerNearby;
 
-                lastSpawnTick = currentTick;
+        if (!growthPaused && elapsedTicks > 0 && spawnTimer > 0)
+        {
+            spawnTimer = Math.max(0, spawnTimer - elapsedTicks);
+            ticksSinceSave += elapsedTicks;
+            ticksSinceClientSync += elapsedTicks;
+        }
+
+        if (spawnTimer <= 0)
+        {
+            if (!spawnMob(level, pos, state))
+            {
+                spawnTimer = GROWTH_CHECK_INTERVAL;
+                saveAndSyncClient();
+            }
+            return;
+        }
+
+        if (pauseChanged)
+        {
+            ticksSinceSave = 0;
+            ticksSinceClientSync = 0;
+            saveAndSyncClient();
+            return;
+        }
+
+        if (ticksSinceSave >= SAVE_INTERVAL)
+        {
+            ticksSinceSave = 0;
+            setChanged();
+        }
+
+        if (ticksSinceClientSync >= CLIENT_SYNC_INTERVAL)
+        {
+            ticksSinceClientSync = 0;
+            syncClient();
+        }
+    }
+
+    private boolean ensureMobVariant(ServerLevel level, BlockPos pos)
+    {
+        if (mobVariantReady)
+        {
+            return true;
+        }
+
+        CompoundTag variant = MobSeedVariant.create(level, pos, getEntityType());
+        if (variant == null)
+        {
+            return false;
+        }
+
+        setMobVariant(variant);
+        mobVariantReady = true;
+        saveAndSyncClient();
+        return true;
+    }
+
+    private void setMobVariant(CompoundTag variant)
+    {
+        mobVariant = variant;
+        mobVariantKey = variant.toString();
+    }
+
+    private int getElapsedTicks(long currentTick)
+    {
+        if (lastGrowthTick < 0)
+        {
+            lastGrowthTick = currentTick;
+            return 0;
+        }
+
+        long elapsedTicks = currentTick - lastGrowthTick;
+        lastGrowthTick = currentTick;
+        return (int) Math.min(GROWTH_CHECK_INTERVAL, Math.max(0, elapsedTicks));
+    }
+
+    private boolean hasPlayerNearby(ServerLevel level, BlockPos pos, int distance)
+    {
+        double centerX = pos.getX() + 0.5D;
+        double centerY = pos.getY() + 0.5D;
+        double centerZ = pos.getZ() + 0.5D;
+
+        for (Player player : level.players())
+        {
+            if (Math.abs(player.getX() - centerX) <= distance
+                    && Math.abs(player.getY() - centerY) <= distance
+                    && Math.abs(player.getZ() - centerZ) <= distance)
+            {
+                return true;
             }
         }
+
+        return false;
     }
 
-    @Override
-    public ClientboundBlockEntityDataPacket getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    private boolean spawnMob(ServerLevel level, BlockPos pos, BlockState state)
+    {
+        Mob mob = getEntityType().create(level, EntitySpawnReason.EVENT);
+        if (mob == null)
+        {
+            return false;
+        }
+
+        double spawnX = pos.getX() + 0.5D;
+        double spawnY = pos.getY();
+        double spawnZ = pos.getZ() + 0.5D;
+        float rotation = state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot();
+        mob.setPos(spawnX, spawnY, spawnZ);
+        EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
+
+        if (MobSeedVariant.loadVariant(mob, mobVariant))
+        {
+            mob.setPos(spawnX, spawnY, spawnZ);
+            mob.setYRot(rotation);
+            mob.yRotO = rotation;
+            mob.yBodyRot = rotation;
+            mob.yBodyRotO = rotation;
+            mob.yHeadRot = rotation;
+            mob.yHeadRotO = rotation;
+
+            if (mob instanceof AgeableMob ageableMob)
+            {
+                ageableMob.setBaby(true);
+            }
+
+            if (level.addFreshEntity(mob))
+            {
+                level.setBlock(pos, state.getValue(MobSeedBlock.WATERLOGGED) ? Blocks.WATER.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                level.playSound(null, pos, SoundType.GRASS.getPlaceSound(), SoundSource.NEUTRAL, 1.0F, 1.0F);
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    private void sync() {
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            setChanged();
+    private void saveAndSyncClient()
+    {
+        setChanged();
+        syncClient();
+    }
+
+    private void syncClient()
+    {
+        if (level != null && !level.isClientSide())
+        {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
     }
 
-    public int getAge() {
-        return Math.max(0, maxGrowthTime - spawnTimer);
+    private MobSeedBlock getSeedBlock()
+    {
+        return (MobSeedBlock) getBlockState().getBlock();
     }
 
-    public int getRemainingTime() {
+    public int getRemainingTime()
+    {
         return Math.max(0, spawnTimer);
     }
 
-    public float getGrowthScale() {
-        float scale = 0.1f + 0.9f * (1.0f - ((float) spawnTimer / maxGrowthTime));
-        return scale; // Start at 10% size and grow to full size
-    }
-
-    public EntityType<T> getEntityType() {
-        return entityType;
-    }
-
-    @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    public float getGrowthScale(float partialTick)
     {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("SpawnTimer")) {
-            spawnTimer = tag.getInt("SpawnTimer");
+        double remainingTime = spawnTimer;
+        if (level != null && level.isClientSide() && !growthPaused && clientSyncGameTime >= 0)
+        {
+            remainingTime -= Math.max(0L, level.getGameTime() - clientSyncGameTime) + partialTick;
         }
-        if (tag.contains("LastSpawnTick")) {
-            lastSpawnTick = tag.getLong("LastSpawnTick");
+
+        float growth = 1.0F - ((float) Math.max(0.0D, remainingTime) / Math.max(1, maxGrowthTime));
+        return 0.1F + 0.9F * Math.max(0.0F, Math.min(1.0F, growth));
+    }
+
+    public EntityType<? extends Mob> getEntityType()
+    {
+        return getSeedBlock().getEntityType();
+    }
+
+    public boolean isMobVariantReady()
+    {
+        return mobVariantReady;
+    }
+
+    public CompoundTag getMobVariant()
+    {
+        return mobVariant;
+    }
+
+    public String getMobVariantKey()
+    {
+        return mobVariantKey;
+    }
+
+    @Override
+    public void onLoad()
+    {
+        super.onLoad();
+        if (level instanceof ServerLevel serverLevel)
+        {
+            lastGrowthTick = serverLevel.getGameTime();
+            ensureMobVariant(serverLevel, worldPosition);
+            int delay = 1 + Math.floorMod(worldPosition.hashCode(), GROWTH_CHECK_INTERVAL);
+            serverLevel.scheduleTick(worldPosition, getBlockState().getBlock(), delay);
+        }
+        else if (level != null && level.isClientSide())
+        {
+            clientSyncGameTime = level.getGameTime();
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putInt("SpawnTimer", spawnTimer);
-        tag.putLong("LastSpawnTick", lastSpawnTick);
+    public void onChunkUnloaded()
+    {
+        lastGrowthTick = -1;
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        saveAdditional(tag, registries);
-        return tag;
+    public ClientboundBlockEntityDataPacket getUpdatePacket()
+    {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-        loadAdditional(tag, lookupProvider);
+    public void onDataPacket(Connection connection, ValueInput input)
+    {
+        handleUpdateTag(input);
+    }
+
+    @Override
+    public void loadAdditional(ValueInput input)
+    {
+        super.loadAdditional(input);
+        maxGrowthTime = Math.max(1, input.getIntOr("MaxGrowthTime", getSeedBlock().getGrowthTime()));
+        spawnTimer = input.getIntOr("SpawnTimer", maxGrowthTime);
+        growthPaused = input.getBooleanOr("GrowthPaused", false);
+        mobVariantReady = input.getBooleanOr("MobVariantReady", false);
+        setMobVariant(input.read("MobVariant", CompoundTag.CODEC).orElseGet(CompoundTag::new));
+        if (level != null && level.isClientSide())
+        {
+            clientSyncGameTime = level.getGameTime();
+        }
+    }
+
+    @Override
+    protected void saveAdditional(ValueOutput output)
+    {
+        super.saveAdditional(output);
+        output.putInt("MaxGrowthTime", maxGrowthTime);
+        output.putInt("SpawnTimer", spawnTimer);
+        output.putBoolean("GrowthPaused", growthPaused);
+        output.putBoolean("MobVariantReady", mobVariantReady);
+        if (!mobVariant.isEmpty())
+        {
+            output.store("MobVariant", CompoundTag.CODEC, mobVariant);
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
+    {
+        return saveWithoutMetadata(registries);
     }
 }

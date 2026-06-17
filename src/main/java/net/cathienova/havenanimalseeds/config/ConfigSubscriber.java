@@ -5,7 +5,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 
-@EventBusSubscriber(modid = HavenAnimalSeeds.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = HavenAnimalSeeds.MOD_ID)
 public class ConfigSubscriber {
     @SubscribeEvent
     public static void onModConfigEvent(final ModConfigEvent event) {

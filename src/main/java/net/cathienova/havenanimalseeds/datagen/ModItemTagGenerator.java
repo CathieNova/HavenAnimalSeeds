@@ -5,50 +5,38 @@ import net.cathienova.havenanimalseeds.block.ModBlocks;
 import net.cathienova.havenanimalseeds.util.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.data.ItemTagsProvider;
 
 import java.util.concurrent.CompletableFuture;
 
 public class ModItemTagGenerator extends ItemTagsProvider {
-    public ModItemTagGenerator(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture,
-                               CompletableFuture<TagLookup<Block>> lookupCompletableFuture, @Nullable ExistingFileHelper existingFileHelper) {
-        super(packOutput, completableFuture, lookupCompletableFuture, HavenAnimalSeeds.MOD_ID, existingFileHelper);
+    public ModItemTagGenerator(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider, HavenAnimalSeeds.MOD_ID);
     }
 
     @Override
-    protected void addTags(HolderLookup.@NotNull Provider pProvider)
+    protected void addTags(HolderLookup.Provider provider)
     {
-        this.tag(ModTags.Items.animalSeeds)
-                .add(ModBlocks.axolotl_seed.get().asItem())
-                .add(ModBlocks.bee_seed.get().asItem())
-                .add(ModBlocks.cat_seed.get().asItem())
-                .add(ModBlocks.chicken_seed.get().asItem())
-                .add(ModBlocks.cow_seed.get().asItem())
-                .add(ModBlocks.donkey_seed.get().asItem())
-                .add(ModBlocks.fox_seed.get().asItem())
-                .add(ModBlocks.goat_seed.get().asItem())
-                .add(ModBlocks.horse_seed.get().asItem())
-                .add(ModBlocks.llama_seed.get().asItem())
-                .add(ModBlocks.mooshroom_seed.get().asItem())
-                .add(ModBlocks.mule_seed.get().asItem())
-                .add(ModBlocks.ocelot_seed.get().asItem())
-                .add(ModBlocks.panda_seed.get().asItem())
-                .add(ModBlocks.pig_seed.get().asItem())
-                .add(ModBlocks.rabbit_seed.get().asItem())
-                .add(ModBlocks.sheep_seed.get().asItem())
-                .add(ModBlocks.sniffer_seed.get().asItem())
-                .add(ModBlocks.parrot_seed.get().asItem())
-                .add(ModBlocks.turtle_seed.get().asItem())
-                .add(ModBlocks.wolf_seed.get().asItem())
-                .add(ModBlocks.dolphin_seed.get().asItem())
-                .add(ModBlocks.glow_squid_seed.get().asItem())
-                .add(ModBlocks.polar_bear_seed.get().asItem())
-                .add(ModBlocks.squid_seed.get().asItem())
-                .add(ModBlocks.villager_seed.get().asItem())
-                ;
+        var animalSeeds = this.tag(ModTags.Items.animalSeeds);
+        ModBlocks.getMobSeeds().forEach(seed -> animalSeeds.add(seed.get().asItem()));
+
+        this.tag(ModTags.Items.dyes)
+                .add(Items.WHITE_DYE)
+                .add(Items.ORANGE_DYE)
+                .add(Items.MAGENTA_DYE)
+                .add(Items.LIGHT_BLUE_DYE)
+                .add(Items.YELLOW_DYE)
+                .add(Items.LIME_DYE)
+                .add(Items.PINK_DYE)
+                .add(Items.GRAY_DYE)
+                .add(Items.LIGHT_GRAY_DYE)
+                .add(Items.CYAN_DYE)
+                .add(Items.PURPLE_DYE)
+                .add(Items.BLUE_DYE)
+                .add(Items.BROWN_DYE)
+                .add(Items.GREEN_DYE)
+                .add(Items.RED_DYE)
+                .add(Items.BLACK_DYE);
     }
 }

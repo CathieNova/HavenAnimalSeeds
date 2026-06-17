@@ -1,26 +1,31 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
+
 [[mods]]
-    modId="havenanimalseeds"
+    modId="${mod_id}"
     version="${mod_version}"
     displayName="${mod_name}"
     authors="${mod_authors}"
     description='''${mod_description}'''
-[[dependencies.havenanimalseeds]]
+
+[[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
     versionRange="${neo_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.havenanimalseeds]]
+
+[[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.havenanimalseeds]]
+
+[[dependencies.${mod_id}]]
     modId="jade"
-    versionRange="[15.8.1,)"
+    type="required"
+    versionRange="${jade_version_range}"
     ordering="NONE"
     side="BOTH"

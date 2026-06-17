@@ -1,90 +1,40 @@
 package net.cathienova.havenanimalseeds;
 
 import net.cathienova.havenanimalseeds.block.ModBlockEntities;
-import net.cathienova.havenanimalseeds.block.ModBlocks;
+import net.cathienova.havenanimalseeds.item.MobSeedItem;
 import net.cathienova.havenanimalseeds.util.MobSeedRenderer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
-@EventBusSubscriber(modid = HavenAnimalSeeds.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+import java.util.List;
+
+@EventBusSubscriber(modid = HavenAnimalSeeds.MOD_ID, value = Dist.CLIENT)
 public class HavenAnimalSeedsClient
 {
-    public HavenAnimalSeedsClient() {
-        ModLoadingContext.get().getActiveContainer().getEventBus().addListener(this::clientSetup);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    private void clientSetup(final FMLClientSetupEvent event)
+    @SubscribeEvent
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
-        registerRenderers();
-    }
-    @OnlyIn(Dist.CLIENT)
-    private void registerRenderers()
-    {
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.axolotl_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.bee_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.cat_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.chicken_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.cow_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.donkey_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.fox_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.goat_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.horse_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.llama_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.mooshroom_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.mule_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.ocelot_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.panda_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.pig_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.rabbit_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.sheep_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.sniffer_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.parrot_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.turtle_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.wolf_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.dolphin_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.glow_squid_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.polar_bear_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.squid_seed.get(), RenderType.cutout());
-        ItemBlockRenderTypes.setRenderLayer(ModBlocks.villager_seed.get(), RenderType.cutout());
-
-        BlockEntityRenderers.register(ModBlockEntities.axolotl_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.bee_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.cat_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.chicken_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.cow_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.donkey_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.fox_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.goat_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.horse_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.llama_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.mooshroom_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.mule_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.ocelot_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.panda_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.pig_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.rabbit_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.sheep_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.sniffer_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.parrot_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.turtle_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.wolf_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.dolphin_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.glow_squid_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.polar_bear_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.squid_seed_tile.get(), MobSeedRenderer::new);
-        BlockEntityRenderers.register(ModBlockEntities.villager_seed_tile.get(), MobSeedRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.mob_seed.get(), MobSeedRenderer::new);
     }
 
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event)
+    public static void addSeedTooltips(ItemTooltipEvent event)
     {
+        if (event.getItemStack().getItem() instanceof MobSeedItem seedItem)
+        {
+            List<Component> toolTip = event.getToolTip();
+            toolTip.addAll(Math.min(1, toolTip.size()), seedItem.getPlacementTooltips());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload event)
+    {
+        MobSeedRenderer.clearModels(event.getLevel());
     }
 }

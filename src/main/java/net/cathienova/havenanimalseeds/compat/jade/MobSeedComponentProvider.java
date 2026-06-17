@@ -1,40 +1,43 @@
 package net.cathienova.havenanimalseeds.compat.jade;
 
-import net.cathienova.havenanimalseeds.config.CommonConfig;
-import net.cathienova.havenanimalseeds.config.HavenConfig;
+import net.cathienova.havenanimalseeds.HavenAnimalSeeds;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec2;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.config.IPluginConfig;
-import snownee.jade.api.ui.IElement;
-import snownee.jade.api.ui.IElementHelper;
+import snownee.jade.api.ui.Element;
+import snownee.jade.api.ui.JadeUI;
 
-public enum MobSeedComponentProvider implements IBlockComponentProvider {
+public enum MobSeedComponentProvider implements IBlockComponentProvider
+{
     INSTANCE;
 
     @Override
-    public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        if (accessor.getServerData().contains("RemainingTime")) {
-            IElement icon = IElementHelper.get().item(new ItemStack(Items.CLOCK), 0.5f).size(new Vec2(10, 10)).translate(new Vec2(0, -1));
-            icon.message(null);
-            tooltip.add(icon);
-            int remainingTime = accessor.getServerData().getInt("RemainingTime");
-            tooltip.append(Component.translatable("mobseed.remaining_time", remainingTime));
+    public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config)
+    {
+        if (!accessor.getServerData().contains("RemainingTime"))
+        {
+            return;
+        }
 
-            if (accessor.getPlayer() != null && accessor.getPlayer().distanceToSqr(accessor.getPosition().getX(), accessor.getPosition().getY(), accessor.getPosition().getZ()) < Math.pow(HavenConfig.playerGrowthDistance, 2)) {
-                tooltip.add(Component.translatable("mobseed.tooclose"));
-            }
+        Element icon = JadeUI.item(new ItemStack(Items.CLOCK), 0.5F).size(10, 10).offset(0, -1);
+        tooltip.add(icon);
+        int remainingTime = accessor.getServerData().getIntOr("RemainingTime", 0);
+        tooltip.append(Component.translatable("mobseed.remaining_time", remainingTime));
 
+        if (accessor.getServerData().getBooleanOr("PlayerTooClose", false))
+        {
+            tooltip.add(Component.translatable("mobseed.tooclose"));
         }
     }
 
     @Override
-    public ResourceLocation getUid() {
-        return ResourceLocation.fromNamespaceAndPath("havenanimalseeds", "mobseed_remaining_time");
+    public Identifier getUid()
+    {
+        return Identifier.fromNamespaceAndPath(HavenAnimalSeeds.MOD_ID, "mobseed_remaining_time");
     }
 }

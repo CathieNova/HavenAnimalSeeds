@@ -2,8 +2,6 @@ package net.cathienova.havenanimalseeds.config;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class CommonConfig {
     public final ModConfigSpec.IntValue playerGrowthDistance;
@@ -33,10 +31,14 @@ public class CommonConfig {
     public final ModConfigSpec.IntValue polar_bear_seed_spawn_timer;
     public final ModConfigSpec.IntValue squid_seed_spawn_timer;
     public final ModConfigSpec.IntValue villager_seed_spawn_timer;
+    public final ModConfigSpec.IntValue allay_seed_spawn_timer;
+    public final ModConfigSpec.IntValue armadillo_seed_spawn_timer;
+    public final ModConfigSpec.IntValue camel_seed_spawn_timer;
+    public final ModConfigSpec.IntValue nautilus_seed_spawn_timer;
 
     public CommonConfig(ModConfigSpec.Builder builder) {
-        builder.comment("Mob Seeds").push("mobSeeds").build();
-        playerGrowthDistance = builder.comment("The distance in blocks a player has to be from a mob seed for it to grow. (if 3 then it checks 3x3x3)").defineInRange("playerGrowthDistance", 20, 1, Integer.MAX_VALUE);
+        builder.comment("Mob Seeds").push("mobSeeds");
+        playerGrowthDistance = builder.comment("The distance in blocks a player has to be from a mob seed for it to grow.").defineInRange("playerGrowthDistance", 20, 1, Integer.MAX_VALUE);
         axolotl_seed_spawn_timer = builder.comment("The time it takes in ticks for an axolotl to spawn from an axolotl seed. (20 ticks = 1 second)").defineInRange("axolotl_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
         bee_seed_spawn_timer = builder.comment("The time it takes in ticks for a bee to spawn from a bee seed. (20 ticks = 1 second)").defineInRange("bee_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
         cat_seed_spawn_timer = builder.comment("The time it takes in ticks for a cat to spawn from a cat seed. (20 ticks = 1 second)").defineInRange("cat_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
@@ -63,6 +65,10 @@ public class CommonConfig {
         polar_bear_seed_spawn_timer = builder.comment("The time in ticks it takes for a polar bear to spawn from a polar bear seed. (20 ticks = 1 second)").defineInRange("polar_bear_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
         squid_seed_spawn_timer = builder.comment("The time in ticks it takes for a squid to spawn from a squid seed. (20 ticks = 1 second)").defineInRange("squid_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
         villager_seed_spawn_timer = builder.comment("The time in ticks it takes for a villager to spawn from a villager seed. (20 ticks = 1 second)").defineInRange("villager_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
+        allay_seed_spawn_timer = builder.comment("The time in ticks it takes for an allay to spawn from an allay seed. (20 ticks = 1 second)").defineInRange("allay_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
+        armadillo_seed_spawn_timer = builder.comment("The time in ticks it takes for an armadillo to spawn from an armadillo seed. (20 ticks = 1 second)").defineInRange("armadillo_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
+        camel_seed_spawn_timer = builder.comment("The time in ticks it takes for a camel to spawn from a camel seed. (20 ticks = 1 second)").defineInRange("camel_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
+        nautilus_seed_spawn_timer = builder.comment("The time in ticks it takes for a nautilus to spawn from a nautilus seed. (20 ticks = 1 second)").defineInRange("nautilus_seed_spawn_timer", 12000, 1, Integer.MAX_VALUE);
         builder.pop();
     }
 }
